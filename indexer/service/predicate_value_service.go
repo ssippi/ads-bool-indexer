@@ -14,15 +14,20 @@ var (
 type PredicateValueService struct {
 }
 
-func (a PredicateValueService) GetPredicateValueIds(user ad_model.User) []int {
+func (a PredicateValueService) GetPredicateValueIds(userData map[string]string) []int {
 	// 根据熟悉值获取ValueId
-	var ageId = a.getIdByValue("age", strconv.Itoa(user.Age))
-	var genderId = a.getIdByValue("gender", user.Gender)
-	var provinceIds = a.getIdsByValue("province", user.Province)
-
-	// 去0
-	var predicateIds = provinceIds
-	predicateIds = append(predicateIds, ageId, genderId)
+	var predicateIds []int
+	for key, value := range userData {
+		if key == "province" {
+			// 父子数据类型
+			var ids = a.getIdsByValue("province", value)
+			predicateIds = append(predicateIds, ids...)
+		} else {
+			id := a.getIdByValue(key, value)
+			predicateIds = append(predicateIds, id)
+		}
+	}
+	// 排出非法用户定向
 	predicateIds = getIdWithOutZero(predicateIds)
 	return predicateIds
 }

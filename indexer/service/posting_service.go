@@ -53,6 +53,7 @@ func (p PListService) GetMatch(K int) []int {
 		for L := 0; L <= K-1; L++ {
 			p.pListAry[L].SkipTo(nextID)
 		}
+		// 排序性能不高，可优化
 		p.SortByCurrent()
 	}
 	return result

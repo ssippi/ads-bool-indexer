@@ -2,6 +2,7 @@ package ad_model
 
 const (
 	// AttrAge 广告纬度
+	AttrAge      = "age"      // 性别
 	AttrGender   = "gender"   // 性别
 	AttrCountry  = "country"  // 国家
 	AttrProvince = "province" // 城市

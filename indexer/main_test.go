@@ -9,20 +9,18 @@ import (
 
 func TestSliceCapLen(t *testing.T) {
 
+	// 匹配广告定向。转成内部枚举id
 	predicateValueService := service.PredicateValueService{}
-	indexService := service.IndexService{}
+	predicateValueService.InitPredicateMap()
+	var userMap = make(map[string]string)
+	userMap[ad_model.AttrAge] = "20"
+	userMap[ad_model.AttrGender] = "female"
+	userMap[ad_model.AttrProvince] = "上海"
+	predicateValueIds := predicateValueService.GetPredicateValueIds(userMap)
 
 	// 创建全量索引
-	predicateValueService.InitPredicateMap()
+	indexService := service.IndexService{}
 	indexService.BuildIndex()
-
-	// 匹配广告
-	user := ad_model.User{}
-	user.Age = 20
-	user.Gender = "male"
-	user.Province = "shanghai"
-	predicateValueIds := predicateValueService.GetPredicateValueIds(user)
-
 	adIDs := indexService.Match(predicateValueIds)
 	fmt.Println(adIDs)
 }

@@ -40,7 +40,7 @@ func GetPredicateValueFromDB() []ad_model.PredicateValue {
 	})
 	vs = append(vs, ad_model.PredicateValue{
 		ID:        5,
-		ParentID:  100,
+		ParentID:  4,
 		ValueType: ad_model.Value,
 		Attr:      ad_model.AttrProvince,
 		Value:     "shanghai",
