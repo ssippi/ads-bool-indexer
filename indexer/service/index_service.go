@@ -6,14 +6,14 @@ import (
 	"ads-bool-indexer/indexer/tools"
 )
 
-var indexer index_model.Indexer
+var gIndexer index_model.Indexer
 
 type IndexService struct {
 }
 
 func (a IndexService) BuildIndex() {
 	// 获取广告数据
-	adsData := GetADSFromDB()
+	adsData := ad_model.GetADSFromDB()
 	// 构建索引
 	conjunctions := a.getConjunctions(adsData)
 
@@ -39,7 +39,7 @@ func (a IndexService) BuildIndex() {
 	data.ConjAdIdMap = conjAdIdMap
 	data.PredicateConjMap = predicateConjMap
 	data.MaxConjSize = maxConjSize
-	indexer = data
+	gIndexer = data
 }
 
 func (a IndexService) getConjunctions(ads []ad_model.Ad) []index_model.Conjunction {
@@ -100,10 +100,10 @@ func (a IndexService) buildPredicateConjMap(conjunctionLevelMap map[int][]index_
 					ConjId:   conjunction.ConjId,
 					Contains: predicate.Contains,
 				}
-				for _, predicateValueID := range predicate.ValueIDs {
-					pIds, _ := conjAry[predicateValueID]
+				for _, PredicateEnumID := range predicate.ValueIDs {
+					pIds, _ := conjAry[PredicateEnumID]
 					pIds = append(pIds, entry)
-					conjAry[predicateValueID] = pIds
+					conjAry[PredicateEnumID] = pIds
 				}
 			}
 		}
@@ -112,18 +112,18 @@ func (a IndexService) buildPredicateConjMap(conjunctionLevelMap map[int][]index_
 	return conjLevelMap
 }
 
-func (a IndexService) Match(predicateValueIds []int) []int {
-	conjIDs := a.matchConjID(predicateValueIds)
+func (a IndexService) Match(PredicateEnumIds []int) []int {
+	conjIDs := a.matchConjID(PredicateEnumIds)
 	adIds := a.getAdIdsByConjID(conjIDs)
 	return adIds
 }
 
-func (a IndexService) matchConjID(predicateValueIds []int) []int {
+func (a IndexService) matchConjID(PredicateEnumIds []int) []int {
 	var conjunctionIds []int
-	min := tools.Min(len(predicateValueIds), indexer.MaxConjSize)
-	for level := min; level >= 0; level-- {
+	minLevel := tools.Min(len(PredicateEnumIds), gIndexer.MaxConjSize)
+	for level := minLevel; level >= 0; level-- {
 		// 匹配conj
-		pLists := a.getIds(level, predicateValueIds)
+		pLists := a.getIds(level, PredicateEnumIds)
 
 		// k 是满足conj的条件数量
 		K := level
@@ -142,7 +142,7 @@ func (a IndexService) matchConjID(predicateValueIds []int) []int {
 }
 
 func (a IndexService) getIds(level int, predicateIds []int) []index_model.PList {
-	predicateConjMap := indexer.PredicateConjMap[level]
+	predicateConjMap := gIndexer.PredicateConjMap[level]
 	var pLists []index_model.PList
 	for _, id := range predicateIds {
 		// 条件匹配的conj
@@ -158,7 +158,7 @@ func (a IndexService) getIds(level int, predicateIds []int) []index_model.PList 
 func (a IndexService) getAdIdsByConjID(IDs []int) []int {
 	var adIds []int
 	for _, ID := range IDs {
-		datas, _ := indexer.ConjAdIdMap[ID]
+		datas, _ := gIndexer.ConjAdIdMap[ID]
 		adIds = append(adIds, datas...)
 	}
 	return adIds

@@ -1,7 +1,6 @@
 package indexer
 
 import (
-	"ads-bool-indexer/indexer/ad_model"
 	"ads-bool-indexer/indexer/service"
 	"fmt"
 	"testing"
@@ -10,18 +9,18 @@ import (
 func TestSliceCapLen(t *testing.T) {
 
 	// 匹配广告定向。转成内部枚举id
-	predicateValueService := service.PredicateValueService{}
-	predicateValueService.InitPredicateMap()
+	PredicateEnumService := service.PredicateEnumService{}
+	PredicateEnumService.InitPredicateMap()
 	var userMap = make(map[string]string)
-	userMap[ad_model.AttrAge] = "20"
-	userMap[ad_model.AttrGender] = "female"
-	userMap[ad_model.AttrProvince] = "上海"
-	predicateValueIds := predicateValueService.GetPredicateValueIds(userMap)
+	userMap["age"] = "20"
+	userMap["gender"] = "female"
+	userMap["province"] = "上海"
+	PredicateEnumIds := PredicateEnumService.GetPredicateEnumIds(userMap)
 
 	// 创建全量索引
 	indexService := service.IndexService{}
 	indexService.BuildIndex()
-	adIDs := indexService.Match(predicateValueIds)
+	adIDs := indexService.Match(PredicateEnumIds)
 	fmt.Println(adIDs)
 }
 

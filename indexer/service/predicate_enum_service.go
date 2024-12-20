@@ -6,15 +6,20 @@ import (
 )
 
 var (
-	PredicateValueMap  = map[string]int{}                       // map[age_2]PredicateValueId-id匹配
-	PredicateRangeMap  = map[string][]ad_model.PredicateValue{} // map[age][]PredicateValue-范围匹配
-	PredicateParentMap = map[int]int{}                          // map[PredicateValueId]ParentId
+	// map[age_18]id
+	PredicateEnumMap = map[string]int{}
+
+	// map[age][]PredicateEnum-范围匹配
+	PredicateRangeMap = map[string][]ad_model.PredicateEnum{}
+
+	// map[PredicateEnumId]id
+	PredicateParentMap = map[int]int{}
 )
 
-type PredicateValueService struct {
+type PredicateEnumService struct {
 }
 
-func (a PredicateValueService) GetPredicateValueIds(userData map[string]string) []int {
+func (a PredicateEnumService) GetPredicateEnumIds(userData map[string]string) []int {
 	// 根据熟悉值获取ValueId
 	var predicateIds []int
 	for key, value := range userData {
@@ -32,22 +37,22 @@ func (a PredicateValueService) GetPredicateValueIds(userData map[string]string) 
 	return predicateIds
 }
 
-func (a PredicateValueService) InitPredicateMap() {
-	var dataS = GetPredicateValueFromDB()
-	var predicateValueMap = make(map[string]int)
-	var predicateRangeMap = make(map[string][]ad_model.PredicateValue)
+func (a PredicateEnumService) InitPredicateMap() {
+	var dataS = ad_model.GetPredicateEnumFromDB()
+	var PredicateEnumMap = make(map[string]int)
+	var predicateRangeMap = make(map[string][]ad_model.PredicateEnum)
 	var predicateParentMap = make(map[int]int)
 	for _, v := range dataS {
 		if v.ValueType == ad_model.Value {
 			var key = v.Attr + "_" + v.Value
-			predicateValueMap[key] = v.ID
+			PredicateEnumMap[key] = v.ID
 		} else if v.ValueType == ad_model.Range {
 			var key = v.Attr
 			if predicates, ok := predicateRangeMap[key]; ok {
 				predicates = append(predicates, v)
 			} else {
 				// todo
-				predicates = []ad_model.PredicateValue{}
+				predicates = []ad_model.PredicateEnum{}
 				predicates = append(predicates, v)
 				predicateRangeMap[key] = predicates
 			}
@@ -56,7 +61,7 @@ func (a PredicateValueService) InitPredicateMap() {
 			predicateParentMap[v.ID] = v.ParentID
 		}
 	}
-	PredicateValueMap = predicateValueMap
+	PredicateEnumMap = PredicateEnumMap
 	PredicateRangeMap = predicateRangeMap
 	PredicateParentMap = predicateParentMap
 }
@@ -71,9 +76,9 @@ func getIdWithOutZero(ids []int) []int {
 	return predicateIds
 }
 
-func (a PredicateValueService) getIdByValue(attr, value string) int {
+func (a PredicateEnumService) getIdByValue(attr, value string) int {
 	var key = attr + "_" + value
-	if id, ok := PredicateValueMap[key]; ok {
+	if id, ok := PredicateEnumMap[key]; ok {
 		return id
 	}
 	num, _ := strconv.Atoi(value)
@@ -87,7 +92,7 @@ func (a PredicateValueService) getIdByValue(attr, value string) int {
 	return 0
 }
 
-func (a PredicateValueService) getIdsByValue(attr, value string) []int {
+func (a PredicateEnumService) getIdsByValue(attr, value string) []int {
 	id := a.getIdByValue(attr, value)
 	if id == 0 {
 		return []int{}
@@ -96,7 +101,7 @@ func (a PredicateValueService) getIdsByValue(attr, value string) []int {
 	return ids
 }
 
-func (a PredicateValueService) getIdsByPredicateId(id int) []int {
+func (a PredicateEnumService) getIdsByPredicateId(id int) []int {
 	var ids = []int{id}
 	for {
 		if parentID, ok := PredicateParentMap[id]; ok {
