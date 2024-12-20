@@ -22,5 +22,8 @@
     posting_service.go 匹配算法
     predicate_enum_service.go 用户属性转换
 
-### 核心逻辑图
+### 逻辑图
 ![img_1.png](img_1.png)
+
+# 布尔索引简介
+![img_2.png](img_2.png)
